@@ -10,7 +10,7 @@ body {
 .container {
   width: 80%;
   max-width: 800px;
-  text-align: center; /* center button */
+  text-align: center;
 }
 
 #add-event-btn {
@@ -25,10 +25,10 @@ body {
 }
 
 .table-container {
-  border: 2px solid #e6e2d3; /* Border for the events table container */
+  border: 2px solid #e6e2d3; 
   border-radius: 5px;
   background: white;
-  overflow-x: auto; /* responsive */
+  overflow-x: auto; 
 }
 
 .event-table {
@@ -43,15 +43,15 @@ body {
 }
 
 .event-table th {
-  background-color: white; /* Tan header */
+  background-color: white; 
   font-weight: bold;
 }
 
 .event-table tr:nth-child(even) td {
-  background-color: #e6e2d3; /* Alternate row color */
+  background-color: #e6e2d3; 
 }
 .event-table td {
-  background-color: #e6e2d3; /* all data rows tan */
+  background-color: #e6e2d3; 
 }
 button {
   padding: 5px 10px;
