@@ -1,41 +1,51 @@
 // API Module
-const eventAPIs = (function (){
+const eventAPIs = (function () {
     const API_URL = "http://localhost:3000";
 
-    async function getEvents(){
-        return fetch(`${API_URL}/events`).then(res=>res.json());
+    async function getEvents() {
+        return fetch(`${API_URL}/events`).then(res => res.json());
     }
 
-    async function addEvent(newEvent){
-        return await fetch(`${API_URL}/events`,{
-            method:"POST",
+    async function addEvent(newEvent) {
+        return await fetch(`${API_URL}/events`, {
+            method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-            body:JSON.stringify(newEvent),
-        }).then(res=>res.json());
+            body: JSON.stringify(newEvent),
+        }).then(res => res.json());
     }
 
-    async function updateEvent(id, updatedEvent){
-        return await fetch(`${API_URL}/events/${id}`,{
-            method:"PUT",
+    async function updateEvent(id, updatedEvent) {
+        return await fetch(`${API_URL}/events/${id}`, {
+            method: "PUT",
             headers: {
                 "Content-Type": "application/json"
             },
-            body:JSON.stringify(updatedEvent),
-        }).then(res=>res.json());
+            body: JSON.stringify(updatedEvent),
+        }).then(res => res.json());
+    }
+    async function patchEvent(id, updatedFields) {
+        return await fetch(`${API_URL}/events/${id}`, {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(updatedFields),
+        }).then(res => res.json());
     }
 
-    async function deleteEvent(id){
-        return await fetch(`${API_URL}/events/${id}`,{
-            method:"DELETE",
-        }).then(res=>res.json());
+    async function deleteEvent(id) {
+        return await fetch(`${API_URL}/events/${id}`, {
+            method: "DELETE",
+        }).then(res => res.json());
     }
 
     return {
         getEvents,
         addEvent,
         updateEvent,
+        patchEvent,
         deleteEvent,
     };
 })();
@@ -43,46 +53,46 @@ const eventAPIs = (function (){
 // Model
 class EventsModel {
     #events;
-    constructor(events = []){
+    constructor(events = []) {
         this.#events = events;
     }
 
-    getEvents(){
+    getEvents() {
         return this.#events;
     }
 
-    setEvents(newEvents){
+    setEvents(newEvents) {
         this.#events = newEvents;
     }
 
-    addEvent(event){
+    addEvent(event) {
         this.#events.push(event);
     }
 
-    updateEvent(updatedEvent){
+    updateEvent(updatedEvent) {
         this.#events = this.#events.map(event =>
             event.id == updatedEvent.id ? updatedEvent : event
         );
     }
 
-    deleteEvent(id){
+    deleteEvent(id) {
         this.#events = this.#events.filter(event => event.id != id);
     }
 }
 
 // View
 class EventsView {
-    constructor(){
+    constructor() {
         this.addEventBtn = document.querySelector("#add-event-btn");
         this.eventList = document.querySelector("#event-list");
     }
 
-    renderEvents(events){
+    renderEvents(events) {
         this.eventList.innerHTML = "";
         events.forEach(event => this.renderEventRow(event));
     }
 
-    renderEventRow(event){
+    renderEventRow(event) {
         const row = document.createElement("tr");
         row.setAttribute("id", event.id);
         row.innerHTML = `
@@ -105,7 +115,7 @@ class EventsView {
         this.eventList.appendChild(row);
     }
 
-    renderEditRow(event){
+    renderEditRow(event) {
         const row = document.getElementById(event.id);
         row.innerHTML = `
             <td><input type="text" value="${event.eventName}"/></td>
@@ -126,7 +136,7 @@ class EventsView {
         `;
     }
 
-    renderNewEventInputRow(){
+    renderNewEventInputRow() {
         const row = document.createElement("tr");
         row.setAttribute("id", "new");
         row.innerHTML = `
@@ -149,65 +159,65 @@ class EventsView {
         this.eventList.appendChild(row);
     }
 
-    removeRow(id){
+    removeRow(id) {
         document.getElementById(id).remove();
     }
 }
 
 // Controller
 class EventsController {
-    constructor(view, model){
+    constructor(view, model) {
         this.view = view;
         this.model = model;
         this.init();
     }
 
-    init(){
+    init() {
         this.fetchEvents();
         this.setUpEvents();
     }
 
-    async fetchEvents(){
+    async fetchEvents() {
         const events = await eventAPIs.getEvents();
         this.model.setEvents(events);
         this.view.renderEvents(events);
     }
 
-    setUpEvents(){
+    setUpEvents() {
         this.view.addEventBtn.addEventListener("click", () => {
-            if(!document.getElementById("new")){
+            if (!document.getElementById("new")) {
                 this.view.renderNewEventInputRow();
             }
         });
 
         this.view.eventList.addEventListener("click", async (e) => {
             const target = e.target.closest("button");
-            if(!target) return;
+            if (!target) return;
             const row = target.closest("tr");
             const id = row.getAttribute("id");
 
-            if(target.classList.contains("delete-btn")){
+            if (target.classList.contains("delete-btn")) {
                 await eventAPIs.deleteEvent(id);
                 this.model.deleteEvent(id);
                 this.view.removeRow(id);
             }
 
-            if(target.classList.contains("edit-btn")){
+            if (target.classList.contains("edit-btn")) {
                 const event = this.model.getEvents().find(ev => ev.id == id);
                 this.view.renderEditRow(event);
             }
 
-            if(target.classList.contains("save-btn")){
+            if (target.classList.contains("save-btn")) {
                 const inputs = row.querySelectorAll("input");
                 const [nameInput, startInput, endInput] = inputs;
 
-                if(id === "new"){
+                if (id === "new") {
                     const newEvent = {
                         eventName: nameInput.value,
                         startDate: startInput.value,
                         endDate: endInput.value,
                     };
-                    if(!newEvent.eventName || !newEvent.startDate || !newEvent.endDate){
+                    if (!newEvent.eventName || !newEvent.startDate || !newEvent.endDate) {
                         alert("All fields are required.");
                         return;
                     }
@@ -227,8 +237,8 @@ class EventsController {
                 }
             }
 
-            if(target.classList.contains("cancel-btn")){
-                if(id === "new"){
+            if (target.classList.contains("cancel-btn")) {
+                if (id === "new") {
                     this.view.removeRow("new");
                     this.fetchEvents();
                 } else {
