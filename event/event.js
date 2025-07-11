@@ -92,7 +92,7 @@ class EventsView {
         events.forEach(event => this.renderEventRow(event));
     }
 
-    renderEventRow(event) {
+    renderEventRow(event, replaceExisting = false) {
         const row = document.createElement("tr");
         row.setAttribute("id", event.id);
         row.innerHTML = `
@@ -112,7 +112,13 @@ class EventsView {
                 </button>
             </td>
         `;
-        this.eventList.appendChild(row);
+        if(replaceExisting){
+            const existingRow = document.getElementById(event.id);
+            this.eventList.replaceChild(row, existingRow);
+        } else {
+            this.eventList.appendChild(row);
+        }
+        //this.eventList.appendChild(row);
     }
 
     renderEditRow(event) {
@@ -223,7 +229,9 @@ class EventsController {
                     }
                     const created = await eventAPIs.addEvent(newEvent);
                     this.model.addEvent(created);
-                    this.fetchEvents();
+                    this.view.removeRow("new");
+                    //this.fetchEvents();
+                    this.view.renderEventRow(created);
                 } else {
                     const updatedEvent = {
                         id: id,
@@ -233,17 +241,21 @@ class EventsController {
                     };
                     await eventAPIs.updateEvent(id, updatedEvent);
                     this.model.updateEvent(updatedEvent);
-                    this.fetchEvents();
+                    //this.fetchEvents();
+                    //this.view.removeRow(id);
+                    this.view.renderEventRow(updatedEvent,true);
+                    
                 }
             }
 
             if (target.classList.contains("cancel-btn")) {
                 if (id === "new") {
                     this.view.removeRow("new");
-                    this.fetchEvents();
-                } else {
+                    //this.fetchEvents();
+                } else { 
+                    //this.view.removeRow(id);
                     const event = this.model.getEvents().find(ev => ev.id == id);
-                    this.view.renderEventRow(event);
+                    this.view.renderEventRow(event,true);
                 }
             }
         });
